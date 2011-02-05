@@ -1,5 +1,7 @@
 #lang racket
 
+(require racket/serialize)
+
 (define (make-cd title artist rating ripped)
   (make-hash (list (cons 'title title) (cons 'artist artist) (cons 'rating rating)
                    (cons 'ripped ripped))))
@@ -25,3 +27,13 @@
 
 (for-each add-record (list cd1 cd2 cd3))
 
+(define (prompt-read prompt-text)
+  (display prompt-text)
+  (read))
+
+(define (prompt-for-cd)
+  (make-cd
+   (prompt-read "title")
+        (prompt-read "artist")
+        (prompt-read "rating")
+        (prompt-read "ripped")))
