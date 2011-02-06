@@ -1,6 +1,8 @@
 #lang racket
 
+(require mzlib/defmacro)
 (require racket/serialize)
+(require srfi/1)
 
 (define (make-cd title artist rating ripped)
   (make-hash (list (cons 'title title) (cons 'artist artist) (cons 'rating rating)
@@ -16,17 +18,12 @@
                                  (hash-ref cd 'title)
                                  (hash-ref cd 'artist)
                                  (hash-ref cd 'rating)
-                                 )
-                                 
-              ) 
-            *db*))
+                                 )) *db*))
 
 (define cd1 (make-cd "Undertow" "Warpaint" 10 #t))
 (define cd2 (make-cd "Metal Heart" "Cat Power" 9 #t))
 (define cd3 (make-cd "Sugar" "Ladytron" 8 #t))
-
 (for-each add-record (list cd1 cd2 cd3))
-
 (add-record (make-cd "Bees" "Warpaint" 9 #t))
 
 (define (prompt-read prompt-text)
@@ -48,22 +45,24 @@
   (with-input-from-file filename
     (lambda () (set! *db* (deserialize (read))))))
 
-(define (select-by-artist name)
-  (filter (lambda (cd) (string=? name (hash-ref cd 'artist))) *db*))
-
 (define (select selector-fn)
   (filter selector-fn *db*))
 
 (define (where #:title (title '()) #:artist (artist '()) 
             #:rating (rating '()) #:ripped (ripped '()))
   (lambda (cd)
-   
     (and
      (if (not (null? title)) (string=? (hash-ref cd 'title) title) #t)
      (if (not (null? artist)) (string=? (hash-ref cd 'artist) artist) #t)
      (if (not (null? rating)) (string=? (hash-ref cd 'rating) rating) #t)
-     (if (not (null? ripped)) (eq? (hash-ref cd 'ripped) ripped) #t)
-     )
-    )
-  )
+     (if (not (null? ripped)) (eq? (hash-ref cd 'ripped) ripped) #t))))
      
+(define (make-comparisons-expr field value)
+    (list 'string=? (list 'hash-ref 'cd field) value))
+
+(define (make-comparisons-list field-value-pairs)
+  (let loop ((fields field-value-pairs) (comparisons '()))
+    (if (empty? fields)
+        comparisons
+        (loop (cddr fields) 
+              (cons (make-comparisons-expr (car fields) (cadr fields)) comparisons)))))
