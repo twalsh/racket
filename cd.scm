@@ -27,6 +27,8 @@
 
 (for-each add-record (list cd1 cd2 cd3))
 
+(add-record (make-cd "Bees" "Warpaint" 9 #t))
+
 (define (prompt-read prompt-text)
   (display prompt-text)
   (read))
@@ -37,3 +39,31 @@
         (prompt-read "artist")
         (prompt-read "rating")
         (prompt-read "ripped")))
+
+(define (save-db filename)
+  (with-output-to-file filename
+    (lambda () (write (serialize *db*)))))
+
+(define (load-db filename)
+  (with-input-from-file filename
+    (lambda () (set! *db* (deserialize (read))))))
+
+(define (select-by-artist name)
+  (filter (lambda (cd) (string=? name (hash-ref cd 'artist))) *db*))
+
+(define (select selector-fn)
+  (filter selector-fn *db*))
+
+(define (where #:title (title '()) #:artist (artist '()) 
+            #:rating (rating '()) #:ripped (ripped '()))
+  (lambda (cd)
+   
+    (and
+     (if (not (null? title)) (string=? (hash-ref cd 'title) title) #t)
+     (if (not (null? artist)) (string=? (hash-ref cd 'artist) artist) #t)
+     (if (not (null? rating)) (string=? (hash-ref cd 'rating) rating) #t)
+     (if (not (null? ripped)) (eq? (hash-ref cd 'ripped) ripped) #t)
+     )
+    )
+  )
+     
