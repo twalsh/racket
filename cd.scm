@@ -57,6 +57,8 @@
      (if (not (null? rating)) (string=? (hash-ref cd 'rating) rating) #t)
      (if (not (null? ripped)) (eq? (hash-ref cd 'ripped) ripped) #t))))
      
+
+
 (define (make-comparisons-expr field value)
     (list 'string=? (list 'hash-ref 'cd field) value))
 
@@ -66,3 +68,7 @@
         comparisons
         (loop (cddr fields) 
               (cons (make-comparisons-expr (car fields) (cadr fields)) comparisons)))))
+
+(defmacro where2 clauses
+  `#'(lambda (cd)
+       (and ,@(make-comparisons-list clauses)))) 
