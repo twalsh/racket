@@ -10,7 +10,7 @@
 (for/fold ((i 0))
   ((c (in-string fasta)) #:unless (char=? c #\N))
   (let ((alt (list->string (set->list (set-remove nuc c)))))
-    (printf "~a\n" ;"~a\t~a\t~a\t~a\t~a\t~a\t~a\t~a\n" 
-            (string-join (list "chr" (number->string (+ i 1)) "." (string c) "alt" "100" "PASS" "DP=100") "\t")))
+    (printf "~a\t~a\t~a\t~a\t~a\t~a\t~a\t~a\n" 
+            "chr" (+ i 1) "." c alt "100" "PASS" "DP=100"))
   (+ i 1)
   )
