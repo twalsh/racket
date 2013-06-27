@@ -1,19 +1,17 @@
 #lang racket
-(define cipher-text "MHILY LZA ZBHL XBPZXBL MVYABUHL HWWPBZ JSHBKPBZ JHLJBZ
-
-KPJABT HYJHUBT LZA ULBAYVU")
+(define cipher-text "MHILY LZA ZBHL XBPZXBL MVYABUHL HWWPBZ JSHBKPBZ JHLJBZ KPJABT HYJHUBT LZA ULBAYVU")
 
 (define cipher-list (string->list cipher-text))
 
 (define (rotate-letter letter n)
+  (if (equal? letter #\space)
+      letter
   (let ((ascii+ (+ n (char->integer letter))))
-    (if (> ascii+ 90)
-        (integer->char (- ascii+ 26))
-        (integer->char ascii+))))
+    (if
+      (> ascii+ 90)  (integer->char (- ascii+ 26))
+      (integer->char ascii+)
+        ))))
 
-(rotate-letter #\A 1)
-(rotate-letter #\Y 1)
-(rotate-letter #\Z 1)
-;(let loop ((rotation cipher-list))
- ;(unless (empty? rotation)
-    
+(for ((i (in-range 1 26)))
+  (let ((rotation (map (curryr rotate-letter i) cipher-list)))
+    (printf "~a ~a~n" i (list->string rotation))))
