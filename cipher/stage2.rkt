@@ -6,11 +6,11 @@
 (define (rotate-letter letter n)
   (if (equal? letter #\space)
       letter
-  (let ((ascii+ (+ n (char->integer letter))))
-    (if
-      (> ascii+ 90)  (integer->char (- ascii+ 26))
-      (integer->char ascii+)
-        ))))
+      (let ((ascii+ (+ n (char->integer letter))))
+        (if
+         (> ascii+ 90)  (integer->char (- ascii+ 26))
+         (integer->char ascii+)
+         ))))
 
 (for ((i (in-range 1 26)))
   (let ((rotation (map (curryr rotate-letter i) cipher-list)))
