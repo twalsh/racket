@@ -17,7 +17,8 @@
 
 (define sorted-freq (sort freq-list sort-by-freq))
 
-(define most-frequent (string->list "ETAOINSHRDLCUMWFGYPBVKJ"))
+; This was found by trial and error.
+(define most-frequent (string->list "ETAHNOSIRDLGCWFKMUPBYVJ"))
 
 (define (find-plain c) 
   (let loop ((mf most-frequent) (sf sorted-freq))
