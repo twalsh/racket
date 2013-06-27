@@ -5,7 +5,7 @@
 
 (for ((i (in-range 1 26)))
   (let ((rotation (map (lambda (letter)
-                         (if (equal? letter #\space)
+                         (if (eq? letter #\space)
                              letter
                              (let ((ascii+ (+ i (char->integer letter))))
                                (if
