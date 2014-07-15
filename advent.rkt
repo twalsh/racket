@@ -22,16 +22,16 @@
         (let ((header (car section)) (data (cadr section)))
           (hash-set! sections header data))))))
 
-(define long-desc (make-vector 184))
+(define section-reader (make-vector 15))
 
-(define (get-text line)
-  (display line)
-  (cadr (regexp-split #rx"\t" line)))
-
-(define process-1
-  (let loop ((data (hash-ref sections "1")))
-             (let ((text (get-text (car data))))
-    (display text)
-    (loop (cdr data))
-               
-               )))
+(vector-set! section-reader 1
+  (let ((long-desc (make-vector 185)))
+    (vector-set! long-desc 0 "Long description")
+    (let loop ((data (hash-ref sections "1")))
+      (match-let ([(list loc text) (regexp-split #rx"\t" (car data))])
+        (vector-set! long-desc (string->number loc) text)
+        (if (null? (cdr data))
+            long-desc
+            (loop (cdr data))
+            
+            )))))
