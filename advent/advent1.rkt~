@@ -1,0 +1,3 @@
+#lang racket
+
+(with-input-from-file "input1.in"
