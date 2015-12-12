@@ -4,7 +4,7 @@
   (string->list
    (port->string (open-input-file "input1.txt"))))
 
-(let loop
+(define output (let loop
            (
             (orders input)
             (floor 0)
@@ -23,6 +23,7 @@
                  (+ pos 1)
                  (if (and (= floor -1) (= first-entry 0))
                      pos
-                     first-entry)))))
+                     first-entry))))))
                   
-      
+(display output) 
+(newline)
