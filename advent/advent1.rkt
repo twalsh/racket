@@ -17,9 +17,10 @@
       (let ((order (car orders)))
           (loop 
                  (cdr orders)
-                 (if (eq? order #\()
-                     (+ floor 1)
-                     (- floor 1))
+                 (cond ((eq? order #\() (+ floor 1))
+                       ((eq? order #\)) (- floor 1))
+		       (else floor)
+		       )
                  (+ pos 1)
                  (if (and (= floor -1) (= first-entry 0))
                      pos
