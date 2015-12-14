@@ -4,7 +4,7 @@
   (string->list
    (port->string (open-input-file "input1.txt"))))
 
-(let loop
+(define output (let loop
            (
             (orders input)
             (floor 0)
@@ -17,12 +17,14 @@
       (let ((order (car orders)))
           (loop 
                  (cdr orders)
-                 (if (eq? order #\()
-                     (+ floor 1)
-                     (- floor 1))
+                 (cond ((eq? order #\() (+ floor 1))
+                       ((eq? order #\)) (- floor 1))
+		       (else floor)
+		       )
                  (+ pos 1)
                  (if (and (= floor -1) (= first-entry 0))
                      pos
-                     first-entry)))))
+                     first-entry))))))
                   
-      
+(display output) 
+(newline)
