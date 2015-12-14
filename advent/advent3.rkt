@@ -11,15 +11,17 @@
      (orders order-list))
     (if (empty? orders)
         visits
-        (let ((order (car orders)))
-          (let ((x (cond ((eq? order #\<) (- x 1))
-                         ((eq? order #\>) (+ x 1))
-                         (else x)))
-                (y (cond ((eq? order #\v) (- y 1))
-                         ((eq? order #\^) (+ y 1))
-                         (else y))))
-            
-            (loop x y (hash-update visits (cons x y) add1 0) (cdr orders)))))))
+        (let ((o (car orders)))
+            (loop 
+             (cond ((eq? o #\<) (- x 1))
+                   ((eq? o #\>) (+ x 1))
+                   (else x))
+             (cond ((eq? o #\v) (- y 1))
+                   ((eq? o #\^) (+ y 1))
+                   (else y))
+             (hash-update visits (cons x y) add1 0) 
+             (cdr orders))
+          ))))
 
 ; 3a answer
 (hash-count (visit-map input (make-immutable-hash)))
