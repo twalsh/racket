@@ -14,16 +14,17 @@
        ; Extra paper
        (apply * (take (sort dimensions <) 2)))))
 
-(define (read-input in)
-  (let loop ((line (read-line in)) (total-paper 0) (total-ribbon 0))
-    (if (eof-object? line)
-        (cons total-paper total-ribbon)
-        (let ((dimensions (map string->number (string-split line "x"))))
-          (let ((paper (get-paper dimensions))
-                (ribbon (get-ribbon dimensions)))
-            (loop (read-line in) (+ total-paper paper) (+ total-ribbon ribbon))
-            )))))
+(define (read-lines in)
+  (let loop ((lines '()))
+    (let ((line (read-line in)))
+      (if (eof-object? line)
+        (reverse lines)
+        (loop (cons line lines))))))
 
+(define dimensions (map 
+                     (lambda (s) (map string->number (string-split s "x"))) 
+                     (call-with-input-file "input2.txt" read-lines)))
 
-(call-with-input-file "input2.txt" read-input)
+(for/sum ((p (map get-paper dimensions))) p)
+(for/sum ((p (map get-ribbon dimensions))) p)
 
