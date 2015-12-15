@@ -1,50 +1,58 @@
 #lang racket
 (require rackunit)
+(require "advent-utils.rkt")
 
-(define nice-s (list "ugknbfddgicrmopn" "aaa"))
+(define rulesets
+  (list
+   (hash
+    'nice (list "ugknbfddgicrmopn" "aaa")
+    'naughty (vector "jchzalrnumimnmhp" "haegwjzuvuyypxyu" "dvszwmarrgswjxmb")
+    'rules 
+    (list
+     (cons "At least 3 vowels"
+           (lambda (s)
+             (>= (length (regexp-match* #px"[aeiou]" s)) 3)))
+     (cons "At least 1 doubled letter" 
+           (lambda (s)
+             (not (empty? (regexp-match* #px"([a-z])\\1" s)))))
+     (cons "No ab,cd,pq or xy" 
+           (lambda ( s)
+             (not (regexp-match #px"(ab|cd|pq|xy)" s))))
+   ;  (cons "Pair at least twice"
+    ;       (lambda (s)
+     ;        (>= (length (regexp-match* #px"([a-z]{2}).*\\1" s)) 2)))
+     ;(cons "X*X"
+      ;     (lambda (s)
+       ;      (>= (length (regexp-match* #px"([a-z])\\w\\1" s)) 1)))
+     )
+    'expected-rules-output 
+    (vector
+     (vector #t #t #f)
+     (vector #f #t #t)
+     (vector #t #f #t))
+    )))
 
-(define naughty-s (vector "jchzalrnumimnmhp" "haegwjzuvuyypxyu" "dvszwmarrgswjxmb"))
+(define (rule-filter ruleset)
+  (let ((rules (hash-ref ruleset 'rules)))
+    (lambda (s)
+      (andmap (lambda (rule) ((cdr rule) s)) rules))))
 
-(define rules 
-  (vector
-   (cons "At least 3 vowels"
-   (lambda (s)
-     (>= 3 (length (regexp-match* #px"[aeiou]" s)))))
-   (cons "At least 1 doubled letter" 
-   (lambda (s)
-     (not (empty? (regexp-match* #px"([a-z])\\1" s)))))
-   (cons "No ab,cd,pq or xy" 
-   (lambda ( s)
-     (not (regexp-match #px"(ab|cd|pq|xy)" s))))))
+(define (check-ruleset ruleset)
+  (let ((rules (hash-ref ruleset 'rules))
+        (naughty-s (hash-ref ruleset 'naughty))
+        (nice-s (hash-ref ruleset 'nice))
+        (expected-rules-output (hash-ref ruleset 'expected-rules-output)))
+    (let ((rule (lambda (i) (cdr (list-ref rules (- i 1))))))
+        (for ((i (range (length rules))))
+          (let ((rule (list-ref rules i)))
+            (let ((expected (vector-ref expected-rules-output i)))
+              (for ((j (range (vector-length naughty-s))))
+                (let ((s (vector-ref naughty-s j)))
+                  (check-equal? ((cdr rule) s) (vector-ref expected j) s))))))
 
-(define (rule i)
-  (cdr (vector-ref rules (- i 1))))
+        (for ((s nice-s))
+          (check-equal? ((rule-filter ruleset) s) #t s)))))
 
-(define (comb s)
-  (and ((rule 1) s)
-       ((rule 2) s)
-       ((rule 3) s)))
-
-(for ((s nice-s))
-  (check-equal? (comb s) #t s))
-
-(define (n i)
-  (vector-ref naughty-s i ))
-
-(let ((rule (vector-ref rules 0)))
-  (printf "~s~n" (car rule))
-  (check-equal? ((cdr rule) (n 0)) #t (n 0))
-  (check-equal? ((cdr rule) (n 1)) #t (n 1))
-  (check-equal? ((cdr rule) (n 2)) #f (n 2)))
-
-(let ((rule (vector-ref rules 1)))
-  (printf "~s~n" (car rule))
-  (check-equal? ((cdr rule) (n 0)) #f (n 0))
-  (check-equal? ((cdr rule) (n 1)) #t (n 1))
-  (check-equal? ((cdr rule) (n 2)) #t (n 2)))
-
-(let ((rule (vector-ref rules 2)))
-  (printf "~s~n" (car rule))
-  (check-equal? ((cdr rule) (n 0)) #t (n 0))
-  (check-equal? ((cdr rule) (n 1)) #f (n 1))
-  (check-equal? ((cdr rule) (n 2)) #t (n 2)))
+(define lines (call-with-input-file "input5.txt" read-lines))
+(check-ruleset (first rulesets))
+(count (rule-filter (first rulesets)) lines) 
