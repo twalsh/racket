@@ -75,17 +75,6 @@
 (define (report-feed feed)
   (printf "feed ~a, sufficient for ~a people~n" feed (/ feed 20)))
 
-(define (harvest year pop acres grain feed planted)
-  (let ((harvested (+ (* planted _yield))))
-    (hatch-dispatch year pop acres grain feed planted harvested ratfood)))
-
-(define (hatch-dispatch year pop acres grain feed planted harvested ratfood)
-  (let ((diseased (plague pop)))
-    (let ((born (new-born pop acres grain)))
-      (let ((starved (max (- pop (/ feed 20)) 0)))
-        (let ((pop (- (+ pop born) (+ starved diseased))))
-        (new-year year pop acres grain feed planted harvested ratfood diseased born starved))))))
-
 (define (ratfood harvested) (round (* harvested (random) 0.2)))
 
 (define (crop harvest ratfood)
@@ -94,17 +83,19 @@
 (define (max-acres acres grain pop)
   (min acres (* grain 2) (* pop 10)))
 
-(define (plant-crops year pop acres grain feed)
-    (let ((limit (max-acres acres grain pop)))
-      (let loop ((msg (format "How many acres do you wish to plant (0-~a)?" limit)))
-        (displayln msg)
-        (let ((planted (read)))
-          (cond ((< planted 0) (resign))
-                ((> planted acres) (loop (format "Hammurabi: Think again. You own only ~a acres." acres)))
-                ((> (/ planted 2) grain) (loop (format "Hammurabi: Think again. You have only ~a bushels." grain)))
-                ((> planted (* 10 pop)) (loop (format "Hammurabi: But you have only ~a people to tend the fields!" pop)))
-                (else (harvest year pop acres grain feed planted)
-                      ))))))
+(define (hammurabi)
+  (new-year 1 2 3 4 5 6 7 8 9 10))
+
+(define (new-year year pop acres grain planted harvested ratfood diseased born starved)
+  (if (<= year 10)
+      (distribute-grain year pop acres grain)
+      (end-game)))
+
+(define (distribute-grain year pop acres grain)
+  (let ( (feed (prompt (format "How many bushels do you wish to feed your people (0-~a)?" grain)
+          (lambda (n) (<= n grain))
+          (format "Hammurabi: Think again. You have only ~a bushels of grain." grain))))
+    (trade-acres year pop acres grain feed)))
 
 (define (trade-acres year pop acres grain feed)
   (let ((price (+ 1 (random 25))))
@@ -128,19 +119,29 @@
        
         ))))
 
-(define (distribute-grain year pop acres grain)
-  (let ( (feed (prompt (format "How many bushels do you wish to feed your people (0-~a)?" grain)
-          (lambda (n) (<= n grain))
-          (format "Hammurabi: Think again. You have only ~a bushels of grain." grain))))
-    (trade-acres year pop acres grain feed)))
+(define (plant-crops year pop acres grain feed)
+    (let ((limit (max-acres acres grain pop)))
+      (let loop ((msg (format "How many acres do you wish to plant (0-~a)?" limit)))
+        (displayln msg)
+        (let ((planted (read)))
+          (cond ((< planted 0) (resign))
+                ((> planted acres) (loop (format "Hammurabi: Think again. You own only ~a acres." acres)))
+                ((> (/ planted 2) grain) (loop (format "Hammurabi: Think again. You have only ~a bushels." grain)))
+                ((> planted (* 10 pop)) (loop (format "Hammurabi: But you have only ~a people to tend the fields!" pop)))
+                (else (harvest year pop acres grain feed planted)
+                      ))))))
 
-(define (new-year year pop acres grain planted harvested ratfood diseased born starved)
-  (if (<= year 10)
-      (distribute-grain year pop acres grain)
-      (end-game)))
+(define (harvest year pop acres grain feed planted)
+  (let ((harvested (+ (* planted _yield))))
+    (hatch-dispatch year pop acres grain feed planted harvested ratfood)))
 
-(define (hammurabi)
-  (new-year 1 2 3 4 5 6 7 8 9 10))
+(define (hatch-dispatch year pop acres grain feed planted harvested ratfood)
+  (let ((diseased (plague pop)))
+    (let ((born (new-born pop acres grain)))
+      (let ((starved (max (- pop (/ feed 20)) 0)))
+        (let ((pop (- (+ pop born) (+ starved diseased))))
+        (new-year (+ year 1)
+                      pop acres  grain planted harvested ratfood diseased born starved))))))
 
 
 ;
