@@ -13,15 +13,18 @@
 
 (define _yield 3)
 
-(define (distribute-grain kingdom)
-  (let ((grain (send kingdom grain)))
-    (let ((feed
-           (prompt (format "How many bushels do you wish to feed your people (0-~a)?" grain)
-                   (lambda (n) (<= n grain))
-                   (format "Hammurabi: Think again. You have only ~a bushels of grain." grain))))
-      (set-field! feed kingdom feed)
-      )))
-
+(define  (report year harvest planted total-deaths grain ratfood pop starved births diseased acres)
+  (printf "YEAR ~a~n" year)
+  (printf "ACRES ~a " acres)
+  (printf "HARVEST ~a " harvest)
+  (printf "PLANTED ~a " planted)
+  (printf "RATFOOD ~a " ratfood)
+  (printf "GRAIN ~a~n" grain)
+  (printf "POPULATION ~a " pop)
+  (printf "BIRTHS ~a " births)
+  (printf "DISEASE ~a " diseased)
+  (printf "STARVED ~a~n" starved)
+  )
 
 (define (mortality-rate year starved pop) (exact-round (/ (+ (* (- year 1) mortality-rate) (/ (* starved 100) pop)) year)))
 
@@ -69,26 +72,30 @@
                      (set! _grain (+ _grain d-grain)))
                    ))
 
-
-(define  (report year harvest planted total-deaths grain ratfood pop starved births diseased acres)
-  (printf "YEAR ~a~n" year)
-  (printf "ACRES ~a " acres)
-  (printf "HARVEST ~a " harvest)
-  (printf "PLANTED ~a " planted)
-  (printf "RATFOOD ~a " ratfood)
-  (printf "GRAIN ~a~n" grain)
-  (printf "POPULATION ~a " pop)
-  (printf "BIRTHS ~a " births)
-  (printf "DISEASE ~a " diseased)
-  (printf "STARVED ~a~n" starved)
-  )
-
 (define (report-feed feed)
   (printf "feed ~a, sufficient for ~a people~n" feed (/ feed 20)))
 
-(define (plant-crops kingdom)
-  (let ((acres (get-field acres kingdom)) (grain (get-field grain kingdom)) (pop (get-field pop kingdom)))
-    (let ((limit (min acres (* grain 2) (* pop 10))))
+(define (harvest year pop acres grain feed planted)
+  (let ((harvested (+ (* planted _yield))))
+    (hatch-dispatch year pop acres grain feed planted harvested ratfood)))
+
+(define (hatch-dispatch year pop acres grain feed planted harvested ratfood)
+  (let ((diseased (plague pop)))
+    (let ((born (new-born pop acres grain)))
+      (let ((starved (max (- pop (/ feed 20)) 0)))
+        (let ((pop (- (+ pop born) (+ starved diseased))))
+        (new-year year pop acres grain feed planted harvested ratfood diseased born starved))))))
+
+(define (ratfood harvested) (round (* harvested (random) 0.2)))
+
+(define (crop harvest ratfood)
+  (- harvest ratfood))
+
+(define (max-acres acres grain pop)
+  (min acres (* grain 2) (* pop 10)))
+
+(define (plant-crops year pop acres grain feed)
+    (let ((limit (max-acres acres grain pop)))
       (let loop ((msg (format "How many acres do you wish to plant (0-~a)?" limit)))
         (displayln msg)
         (let ((planted (read)))
@@ -96,46 +103,44 @@
                 ((> planted acres) (loop (format "Hammurabi: Think again. You own only ~a acres." acres)))
                 ((> (/ planted 2) grain) (loop (format "Hammurabi: Think again. You have only ~a bushels." grain)))
                 ((> planted (* 10 pop)) (loop (format "Hammurabi: But you have only ~a people to tend the fields!" pop)))
-                (else (send kingdom harvest planted)
-                      )))))))
+                (else (harvest year pop acres grain feed planted)
+                      ))))))
 
-(define (trade-acres kingdom feed)
+(define (trade-acres year pop acres grain feed)
   (let ((price (+ 1 (random 25))))
     (printf "Land is trading at ~a bushels per acre~n" price)
-    (let ((acres (send kingdom acres))
-          (grain (send kingdom grain))
-          (pop (send kingdom pop))
-          )
+   
       (printf "You have ~a acres~n" acres)
       (let ((buy
              (prompt (format "How many acres do you wish to buy (0-~a)" (floor (/ grain price)))
                      (lambda (n) (<= (* n price) grain))
                      (format "Hammurabi: Think again. You have only ~a bushels of grain." grain))))
         (if (> buy 0)
-            (send kingdom plant-crops buy (- (* price buy)))
+            (plant-crops year pop (+ acres buy) (- grain (* price buy)) feed)
             (let ((sell 
                    (prompt (format "How many acres do you wish to sell (0-~a)?" acres)
                            (lambda (n) (<= n acres))
                            (format "Hammurabi: Think again. You own only ~a acres." acres))))
               (if (> sell 0)
-                  (send kingdom plant-crops (- sell) (* sell price))
-                  (send kingdom plant-crops 0 0))
+                  (plant-crops year pop (- acres sell) (+ grain (* sell price)) feed)
+                  (plant-crops year pop acres grain feed)
               ))
        
         ))))
 
-(define (new-year kingdom)
-  (if (<= (send kingdom year) 10)
-      (begin 
-        (distribute-grain kingdom)
-        (trade-acres kingdom)
-        (plant-crops kingdom)
-        (send kingdom hatch-dispatch))
+(define (distribute-grain year pop acres grain)
+  (let ( (feed (prompt (format "How many bushels do you wish to feed your people (0-~a)?" grain)
+          (lambda (n) (<= n grain))
+          (format "Hammurabi: Think again. You have only ~a bushels of grain." grain))))
+    (trade-acres year pop acres grain feed)))
+
+(define (new-year year pop acres grain planted harvested ratfood diseased born starved)
+  (if (<= year 10)
+      (distribute-grain year pop acres grain)
       (end-game)))
 
 (define (hammurabi)
-  (new-year (new kingdom%)
-            ))
+  (new-year 1 2 3 4 5 6 7 8 9 10))
 
 
 ;
