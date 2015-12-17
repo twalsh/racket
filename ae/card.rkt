@@ -9,8 +9,8 @@
         (loop (cons line lines))))))
 
 (define store (make-vector 10 0))
-(define ingress (make-vector 2 0))
-(define egress 0)
+(define ingress '())
+(define egress (lambda (a b) '()))
 
 (define (read-card line)
   (let ((instr (string-ref line 0)))
@@ -19,13 +19,16 @@
                (display col)(newline)(display val)(newline)
                (vector-set! store (string->number col) (string->number val))))
           ((eq? instr #\+)
-           (set! egress (apply + ingress)))
+           (set! egress +))
           ((eq? instr #\-)
-           (set! egress (apply - ingress)))
+           (set! egress -))
           ((eq? instr #\*)
-           (set! egress (apply * ingress)))
+           (set! egress *))
           ((eq? instr #\/)
-           (set! egress (apply / ingress))))))
+           (set! egress /))
+          ((eq? instr #\L)
+           (
+          )))
 
 (define cards '(
                 "N001 1"
