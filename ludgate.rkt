@@ -36,15 +36,35 @@
 (printf "~s ~s~n" n1 d1)
 
 (define (mul n1 n2)
-   (printf "~s ~s -> " n1 n2)
-  (let ((i1 (vector-ref simple-index n1))
-        (i2 (vector-ref simple-index n2)))
-    (let ((ci (+ i1 i2)))
-     
-      (let ((pp (hash-ref partial-product ci)))
-         (printf "~s ~s ~s ~s -> " n1 n2 ci pp)
-        pp))))
+  (printf "MUL ~s ~s:~n" n1 n2)
+  (let ((digits1 (num2digits n1))
+        (digits2 (num2digits n2)))
+    (printf "~s ~s~n" digits1 digits2)
+    (let loop ((sum 0) (shift 1)
+          (pprod
+           (reverse
+            (for*/list ((d1 digits1)
+                        (d2 digits2))
+              (let ((i1 (vector-ref simple-index d1))
+                    (i2 (vector-ref simple-index d2)))
+                (let ((ci (+ i1 i2)))
+                  (let ((pp (hash-ref partial-product ci)))
+                    pp
+                    )))))))
+      ;pprod
+      (if (empty? pprod)
+          sum
+          (loop
+           (+ sum (* (first pprod) shift))
+           (* shift 10)
+           (rest pprod))))))
+      
+      
 
 (for* ((i (range 1 10))
        (j (range 1 10)))
   (printf "~s ~s ~s ~s~n" i j (* i j) (mul i j)))
+
+(define i 12)
+(define j 21)
+(printf "MD ~s MR ~s E ~s A ~s~n" i j (* i j) (mul i j))
