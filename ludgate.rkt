@@ -2,7 +2,7 @@
                         ; 0 1 2 3 4  5 6  7 8  9
 (define simple-index  #( 50 0 1 7 2 23 8 33 3 14 ))
 
-(define partial-product (hash 0 1 1 2 2 4 3 8 4 16 5 32 6 64 7 3 8 6 9 12
+(define product-table (hash 0 1 1 2 2 4 3 8 4 16 5 32 6 64 7 3 8 6 9 12
                               10 24 11 48 12 -1 13 -1 14 9 15 18 16 36 17 72
                               18 -1 19 -1 20 -1 21 27 22 54 23 5 24 10 25 20
                               26 40 27 -1 28 81 29 -1 30 15 31 30 32 -1 33 7
@@ -35,29 +35,34 @@
 
 (printf "~s ~s~n" n1 d1)
 
+(define (shift products)
+  (for/list ((i (in-range (length products)))
+             (p (reverse products)))
+   (* p (expt 10 i))))
+  
+(define (partial-product d1 digits)
+     (let loop ((sum 0)
+                (shift 1)
+                (pprod
+                 (reverse
+                  (for/list ((d2 digits))
+                  (let ((i1 (vector-ref simple-index d1))
+                        (i2 (vector-ref simple-index d2)))
+                    (let ((ci (+ i1 i2)))
+                      (hash-ref product-table ci))
+                    )))))
+       (if (empty? pprod)
+           sum
+           (loop
+            (+ sum (* (first pprod) shift))
+            (* shift 10)
+            (rest pprod)))))
+
 (define (mul n1 n2)
   (printf "MUL ~s ~s:~n" n1 n2)
   (let ((digits1 (num2digits n1))
         (digits2 (num2digits n2)))
-    (printf "~s ~s~n" digits1 digits2)
-    (let loop ((sum 0) (shift 1)
-          (pprod
-           (reverse
-            (for*/list ((d1 digits1)
-                        (d2 digits2))
-              (let ((i1 (vector-ref simple-index d1))
-                    (i2 (vector-ref simple-index d2)))
-                (let ((ci (+ i1 i2)))
-                  (let ((pp (hash-ref partial-product ci)))
-                    pp
-                    )))))))
-      ;pprod
-      (if (empty? pprod)
-          sum
-          (loop
-           (+ sum (* (first pprod) shift))
-           (* shift 10)
-           (rest pprod))))))
+    (apply + (shift (map (lambda (d) (partial-product d digits2)) digits1)))))
       
       
 
