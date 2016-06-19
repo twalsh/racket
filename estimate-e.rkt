@@ -4,12 +4,10 @@
 
 (define (estimate-e)
   (exact->inexact
-   (/ squares (- squares (hash-count (for/hash ((i (in-range squares)))
+   (/ squares (- squares (hash-count (for/hash ((_ (in-range squares)))
                                        (values (random squares) 1)))))))
   
 (define trials 1000) 
   
-(/ (for/sum ((i (in-range trials)))
-     (estimate-e))
-   trials)
+(/ (for/sum ((_ (in-range trials))) (estimate-e)) trials)
   
