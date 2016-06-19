@@ -3,14 +3,11 @@
 (define squares (* 8 8)) 
 
 (define (estimate-e)
-  (let ((board (make-vector squares 0)))
-    (for ((i (in-range squares)))
-      (let ((square (random squares)))
-        (vector-set! board square 1)))
-    (exact->inexact (/ squares (vector-count zero? board)))))
-
+  (exact->inexact
+   (/ squares (- squares (hash-count (for/hash ((_ (in-range squares)))
+                                       (values (random squares) 1)))))))
+  
 (define trials 1000) 
-
-(/ (for/sum ((i (in-range trials)))
-     (estimate-e))
-   trials)
+  
+(/ (for/sum ((_ (in-range trials))) (estimate-e)) trials)
+  
