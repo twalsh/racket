@@ -7,8 +7,8 @@
         (loop (add1 n) (+ sum (random))))))
 
 (define (estimate-e ntrials) 
-  (let ((trials (for/list ((_ (in-range ntrials)))
-                  (picks))))
-    (exact->inexact (/ (apply + trials) ntrials))))
+  (let ((sum-of-trials (for/sum ((_ (in-range ntrials)))
+                         (picks))))
+    (exact->inexact (/ sum-of-trials ntrials))))
 
 (estimate-e 100000)
