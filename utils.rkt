@@ -13,7 +13,13 @@
           (loop (cons line lines))))))
 
 (define text-csv%
-  
+  (class object%
+    (init header data)
+    (define _header header)
+    (define _data data)
+    (super-new)
+    (define/public (get-header) _header)
+    (define/public (get-data) _data)))
 
 (define (text-csv-read file)  
   (let ((lines (read-input file)))
@@ -24,6 +30,6 @@
         ; Create hash mapping field names to numbers
         (let ((dict (for/hash ((i (in-range (vector-length field-names))))
                       (values (vector-ref field-names i) i))))
-          (list dict (rest line-fields)))))))
+          (new text-csv% (header dict) (data (rest line-fields))))))))
 
-(define (text-csv-field-ref text-csv field-name)
+;(define (text-csv-field-ref text-csv field-name)
