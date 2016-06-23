@@ -15,27 +15,34 @@
 (define text-csv%
   (class object%
     (init header data)
-    (define _header header)
-    (define _data data)
+    (define .header header)
+    (define .data data)
+    (define header-length (hash-count .header))
     (super-new)
-    (define/public (get-header) _header)
-    (define/public (get-data) _data)
+    (define/public (get-header) .header)
+    (define/public (get-data) .data)
+    (define/public (get-header-length) header-length)
     (define/public (get-column-index column-name)
-      (hash-ref _header column-name))
+      (hash-ref .header column-name))
     (define/public (get-column column-name)
-      (define column-index (hash-ref _header column-name))
-      (map (lambda (row) (vector-ref row column-index)) _data))
+      (define column-index (hash-ref .header column-name))
+      (map (lambda (row) (vector-ref row column-index)) .data))
     ))
 
 (define (text-csv-read file)  
-  (let ((lines (read-input file)))
-    ; Split lines into fields
-    (let ((line-fields (map (lambda (line) (list->vector (string-split line ","))) lines)))
-      ; Make vector of field names from first line
-      (let ((field-names (first line-fields)))
-        ; Create hash mapping field names to numbers
-        (let ((dict (for/hash ((i (in-range (vector-length field-names))))
-                      (values (vector-ref field-names i) i))))
-          (new text-csv% (header dict) (data (rest line-fields))))))))
-
-;(define (text-csv-field-ref text-csv field-name)
+  (define lines (read-input file))
+  ; Split each line into a vector of cells
+  (define row-vectors (map (lambda (line) (list->vector (string-split line ","))) lines))
+  ; Make vector of column names from first line
+  (define columns (first row-vectors))
+  (define number-of-columns (vector-length columns))
+  ; Remove lines that don't have the expected number of columns
+  (define data-rows
+    (filter (lambda (field-vector)
+              (= (vector-length field-vector) number-of-columns))
+            (rest row-vectors)))
+  ; Create hash mapping field names to numbers
+  (define dict (for/hash ((i (in-range (vector-length columns))))
+                 (values (vector-ref columns i) i)))
+  
+  (new text-csv% (header dict) (data data-rows)))
