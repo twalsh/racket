@@ -39,5 +39,15 @@
             (loop (add1 f) (cons f factor-list))
             (loop (add1 f) factor-list)))))
 
-(map factors clean-numbers)
+(define prime-table (primes-below (inexact->exact (floor (sqrt (apply max clean-numbers))))))
 
+(define (prime-factors n)
+  (for/list ((p prime-table)
+             #:when (= (remainder n p) 0)
+             #:break (> (* p p) n))
+    p))
+
+(for-each
+ (lambda (n)
+   (printf "~a ~a~n" n (prime-factors n)))
+ clean-numbers)
