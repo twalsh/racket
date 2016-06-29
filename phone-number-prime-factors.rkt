@@ -41,13 +41,43 @@
 
 (define prime-table (primes-below (inexact->exact (floor (sqrt (apply max clean-numbers))))))
 
-(define (prime-factors n)
-  (for/list ((p prime-table)
-             #:when (= (remainder n p) 0)
-             #:break (> (* p p) n))
-    p))
+;def trial_division(n):
+;    """Return a list of the prime factors for a natural number."""
+;    if n < 2:
+;        return []
+;    prime_factors = []
+;    for p in prime_sieve(int(n**0.5)):
+;        if p*p > n: break
+;        while n % p == 0:
+;            prime_factors.append(p)
+;            n //= p
+;    if n > 1:
+;        prime_factors.append(n)
+;    return prime_factors
 
-(for-each
- (lambda (n)
-   (printf "~a ~a~n" n (prime-factors n)))
- clean-numbers)
+(define (prime-factors n)
+  ; Convert set to list
+  (set->list
+   ; Remove repeated factors
+   (list->set
+    (if (< n 2)
+        '()
+        (let loop ((pt prime-table) (pl '()) (n1 n))
+          (define p (first pt))
+          ;(printf "L1: ~a ~a ~a~n" n1 p pl)
+          (if (> (* p p) n1)
+              (if (> n1 1)
+                  (cons n1 pl)
+                  pl)
+              (let loop2 ((n2 n1) (pl2 pl))
+                ;(printf "L2: ~a ~a~n" n2 pl2)
+                (if (= (remainder n2 p) 0)
+                    (loop2 (floor (/ n2 p)) (cons p pl2))
+                    (loop (rest pt) pl2 n2)))))))))
+
+(time   
+   (for-each
+    (lambda (n)
+      (printf "~a ~a~n" n (prime-factors n)))
+    clean-numbers)
+   )
