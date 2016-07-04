@@ -30,18 +30,14 @@
 (define prime-table (primes-below (inexact->exact (floor (sqrt (apply max clean-numbers))))))
 
 (define (find-factors-in-prime-series n pt)
-  (define factors
-    (set->list
-     (list->set
-      (if (empty? pt)
-          '()
-          (let ((p (first pt)))
-            (if (> (* p p) n)
-                (if (> n 1)
-                    (list n)
-                    '())
-                (reduce-factor n p (rest pt))))))))
-  (sort factors <=))
+  (if (empty? pt)
+      '()
+      (let ((p (first pt)))
+        (if (> (* p p) n)
+            (if (> n 1)
+                (list n)
+                '())
+            (reduce-factor n p (rest pt))))))
 
 (define (reduce-factor n p ps)
   (if (= (remainder n p) 0)
@@ -49,9 +45,13 @@
       (find-factors-in-prime-series n ps)))
 
 (define (prime-factors n)
-  (if (< n 2)
-      '()
-      (find-factors-in-prime-series n prime-table)))
+  (define factors
+    (set->list
+     (list->set
+      (if (< n 2)
+          '()
+          (find-factors-in-prime-series n prime-table)))))
+  (sort factors <=))
 
 (time   
  (for-each
