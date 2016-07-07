@@ -1,5 +1,7 @@
 #lang racket
 
+(require plot)
+
 (require "prime.rkt")
 (require "utils.rkt")
 
@@ -32,7 +34,7 @@
 
 (define max-number-length (apply min (map length clean-number-lists)))
 
-max-number-length
+;max-number-length
 
 (define clean-numbers
   (map
@@ -77,7 +79,7 @@ max-number-length
   clean-numbers)
  )
 
-factors
+;factors
 
 (define freq (make-hash))
 
@@ -90,7 +92,10 @@ number-of-factors
    (hash-update! freq nf add1 0))
  number-of-factors)
 
-freq
+(define freq-vector-list (map flatten (hash->list freq)))
+
+(plot-new-window? #t)
+(plot (discrete-histogram freq-vector-list))
 
  
 
