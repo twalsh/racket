@@ -8,24 +8,41 @@
 (define numbers
   (send lines get-column "Phone 1 - Value"))
 
+; Remove characters from a string that aren't digits 1-9 and return the
+; digits as a list
+(define (remove-nondigits s)
+  (define char-list (string->list s))
+  (filter (lambda (c) (and (char<=? #\1 c) (char<=? c #\9)))
+          char-list))
+
 (define (number-clean s)
+  ; Split number field if it contains 2 numbers separated by :::
   (define numbers
     (if (string-contains? s ":::")
         (string-split s " ::: ")
         (list s)))
-  (map (lambda (s)
-         (define char-list (string->list s))
-         (list->string
-          (filter (lambda (c)
-                    (and (char<=? #\0 c) (char<=? c #\9)))
-                  char-list))) numbers))
+  (map remove-nondigits numbers))
+
+; Cleaned-up numbers as lists of digits
+(define clean-number-lists
+  (append*
+   (filter (lambda (n)
+             (not (empty? (flatten n))))
+           (map number-clean numbers))))
+
+(define max-number-length (apply min (map length clean-number-lists)))
+
+max-number-length
 
 (define clean-numbers
-  (map string->number
-       (filter (lambda (n)
-                 (not (string=? n "")))
-               (flatten
-                (map number-clean numbers)))))
+  (map
+   (lambda (digit-list)
+     (string->number
+      (list->string
+       (take-right digit-list max-number-length))))
+   clean-number-lists))
+
+;clean-numbers
 
 (define prime-table (primes-below (inexact->exact (floor (sqrt (apply max clean-numbers))))))
 
@@ -53,11 +70,28 @@
           (find-factors-in-prime-series n prime-table)))))
   (sort factors <=))
 
-(time   
- (for-each
+(define factors   
+ (map
   (lambda (n)
-    (printf "~a ~a~n" n (prime-factors n)))
+    (list n (prime-factors n)))
   clean-numbers)
  )
+
+factors
+
+(define freq (make-hash))
+
+(define number-of-factors (map (lambda (f) (length (second f))) factors))
+
+number-of-factors
+
+(for-each
+ (lambda (nf)
+   (hash-update! freq nf add1 0))
+ number-of-factors)
+
+freq
+
+ 
 
 
