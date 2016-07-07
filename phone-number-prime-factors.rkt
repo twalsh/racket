@@ -85,18 +85,27 @@
 
 (define number-of-factors (map (lambda (f) (length (second f))) factors))
 
-number-of-factors
+;number-of-factors
 
 (for-each
  (lambda (nf)
    (hash-update! freq nf add1 0))
  number-of-factors)
 
-(define freq-vector-list (map flatten (hash->list freq)))
+(define freq-vector-list
+  (sort
+   (map flatten (hash->list freq))
+   <=
+   #:key car
+   ))
 
 (plot-new-window? #t)
-(plot (discrete-histogram freq-vector-list))
+(plot (discrete-histogram freq-vector-list)
+      #:x-label "No. of prime factors"
+      #:y-label "Frequency")
 
- 
+(define mean (log (log (expt 10 (add1 max-number-length)))))
+(printf "~a~n" mean)
+
 
 
