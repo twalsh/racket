@@ -3,15 +3,15 @@
 (define in (open-input-file "ulysses.txt"))
 
 (define word-count
-  (hash->list
-   (let loop ((wc (make-immutable-hash)))
-     (let ((line (read-line in)))
+  (let ((wc (make-hash)))
+    (hash->list
+     (let next-line ((line (read-line in)))
        (if (eof-object? line)
            wc
-           (let add-word ((nwc wc) (words (string-split line #px"[\\s.,?;:-]+")))
-             (if (empty? words)
-                 (loop nwc)
-                 (let ((next-word (string-downcase (first words))))
-                   (add-word (hash-update nwc next-word add1 0) (rest words))))))))))
+           (let ((words (map string-downcase (string-split line #px"[\\s.,?;:-]+"))))
+             (for-each
+              (lambda (word) (hash-update! wc word add1 0))
+              words)
+             (next-line (read-line in))))))))
 
 (take (sort word-count > #:key cdr) 20)
