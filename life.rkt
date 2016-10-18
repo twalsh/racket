@@ -33,7 +33,12 @@
   (newline)
   (for ((i (in-range grid-size)))
     (for ((j (in-range grid-size)))
-      (printf "~a" (cell-ref (list i j)))
+      (define char
+        (let ((v (cell-ref (list i j))))
+          (cond ((= v 1) #\space)
+                ((= v 2) #\.)
+                (else #\|))))
+      (printf "~a" char)
       )
     (newline)))
 
@@ -59,37 +64,38 @@
                      (+ grid-size 1))))
       (define np (+ p offset))
       (vector-ref grid np)))
-  (- grid-score 6))
+  (- grid-score 8))
 
 (grid-set! '(4 3
                4 4
                4 5))
 
-;(for ((i (in-range 10)))
 (show-grid)
 
-;(cell-neighbours 2 2)
-cell-indexes
-(length (map (lambda (p) (vector-ref grid p)) cell-indexes))
+(define (grid-update)
+  (for/vector ((p cell-indexes))
+    (define cell-score (cell-neighbours p))
+    (define cell-state
+      (if (= (vector-ref grid p) 2)
+          'LIVE
+          'DIE))
+    (define fate
+      (if (eq? cell-state 'LIVE)
+          (if (or (< cell-score 2) (> cell-score 3))
+              'DIE
+              'LIVE)
+          (if (= cell-score 3)
+              'LIVE
+              'DIE)))
+    ;(printf "~a ~a ~a ~a~n" p cell-state cell-score fate)
+    (if (eq? fate 'LIVE)
+        2
+        1)))
 
-; 6 - 0 neighours
-; 7 - 1 neighbours
-; 8 - 2 neighbours
-; 9 - 3 neighbours
-; 10 - 4 neighbours
-
-(for ((p cell-indexes))
-  (define cell-score (cell-neighbours p))
-  (define cell-state
-    (if (= (vector-ref grid p) 2)
-        'LIVE
-        'DIE))
-  (define fate
-    (if (eq? cell-state 'LIVE)
-        (if (or (< cell-score 2) (> cell-score 3))
-            'DIE
-            'LIVE)
-        (if (= cell-score 3)
-            'LIVE
-            'DIE)))
-  (printf "~a ~a ~a ~a~n" p cell-state cell-score fate))
+(for ((g (in-range 3)))
+  (define updates (grid-update))
+  (for ((i (in-range (length cell-indexes))))
+    (define p (list-ref cell-indexes i))
+    (define s (vector-ref updates i))
+    (vector-set! grid p s))
+  (show-grid))
