@@ -6,9 +6,9 @@
 
 (define (border-cell? p)
   (or (< p grid-size)
-             (>= p (- grid-length grid-size))
-             (= (remainder p grid-size) 0)
-             (= (remainder (add1 p) grid-size) 0)))
+      (>= p (- grid-length grid-size))
+      (= (remainder p grid-size) 0)
+      (= (remainder (add1 p) grid-size) 0)))
 
 (define grid
   (list->vector
@@ -19,31 +19,25 @@
 
 (define cell-indexes
   (for/list ((p (in-range grid-length))
-               #:unless (border-cell? p))
+             #:unless (border-cell? p))
     p))
-    
-(define (cell-pos coor)
-  (+ (* grid-size (first coor)) (second coor)))
-
-(define (cell-ref coor)
-  (define pos (cell-pos coor))
-  (vector-ref grid pos))
 
 (define (show-grid)
   (newline)
-  (for ((i (in-range grid-size)))
-    (for ((j (in-range grid-size)))
-      (define char
-        (let ((v (cell-ref (list i j))))
-          (cond ((= v 1) #\space)
-                ((= v 2) #\.)
-                (else #\|))))
-      (printf "~a" char)
-      )
-    (newline)))
+  (for ((i (in-range grid-length)))
+    (when (= (remainder i grid-size) 0)
+      (newline))
+    (define char
+      (let ((v (vector-ref grid i)))
+        (cond ((= v 1) #\space)
+              ((= v 2) #\*)
+              (else #\|))))
+    (printf "~a" char)))
 
 (define (cell-set! coor value)
-  (vector-set! grid (cell-pos coor) value))
+  (define p
+    (+ (* grid-size (first coor)) (second coor)))
+  (vector-set! grid p value))
 
 (define (grid-set! cells)
   (when (not (empty? cells))
@@ -68,7 +62,11 @@
 
 (grid-set! '(4 3
                4 4
-               4 5))
+               4 5
+               5 2
+               5 3
+               5 4
+               ))
 
 (show-grid)
 
@@ -87,7 +85,6 @@
           (if (= cell-score 3)
               'LIVE
               'DIE)))
-    ;(printf "~a ~a ~a ~a~n" p cell-state cell-score fate)
     (if (eq? fate 'LIVE)
         2
         1)))
