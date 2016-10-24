@@ -2,20 +2,45 @@
 
 (define (string->vector s) (list->vector (string->list s)))
 
-(define seq1 (string->vector "GCATGCU"))
-(define seq2 (string->vector "GATTACA"))
+(define A (string->vector "GCATGCU"))
+(define B (string->vector "GATTACA"))
 
-(define l1 (vector-length seq1))
-(define l2 (vector-length seq2))
+(define lA (add1 (vector-length A)))
+(define lB (add1 (vector-length B)))
 
-(for*/vector ((i (in-range (add1 l1)))
-              (j (in-range (add1 l2))))
-  (let (
-        (s1 (if (= i 0) #\space (vector-ref seq1 (sub1 i))))
-        (s2 (if (= j 0) #\space (vector-ref seq2 (sub1 j)))))
-    (let ((score
-           (cond ((eq? s1 #\space) (- j))
-                 ((eq? s2 #\space) (- i))
-                 ((eq? s1 s2) 1)
-                 (else 0))))
-      (list s1 s2 score))))
+(define F (make-vector (* lA lB) 0))
+
+(define d -1)
+(define S 1)
+
+(for ((i (in-range lA)))
+  (vector-set! F i (* d i)))
+
+(for ((j (in-range lB)))
+  (vector-set! F (* j lA) (* d j)))
+
+F
+
+(define (cell m n)
+  (vector-ref F (+ (* n lA) m)))
+
+(define (cell! m n v)
+  (vector-set! F (+ (* n lA) m) v))
+
+(for* ((i (in-range 1 lA))
+       (j (in-range 1 lB)))
+  (let ((cA (vector-ref A (sub1 i)))
+        (cB (vector-ref B (sub1 j))))
+    (define S (if (eq? cA cB) 1 -1))
+    (let ((match (+ (cell (sub1 i) (sub1 j)) S))
+          (delete (+ (cell (sub1 i) j) d))
+          (insert (+ (cell i (sub1 j)) d)))
+      (cell! i j (max match insert delete)))))
+
+F
+
+(for ((j (in-range lB)))
+  (for ((i (in-range lA)))
+    (printf " ~a" (cell i j)))
+  (newline))
+ 
