@@ -1,5 +1,7 @@
 #lang racket
 
+(require srfi/48)
+
 (define (string->vector s) (list->vector (string->list s)))
 
 (define A (string->vector "GCATGCU"))
@@ -41,6 +43,6 @@ F
 
 (for ((j (in-range lB)))
   (for ((i (in-range lA)))
-    (printf " ~a" (cell i j)))
+    (display (format "~3F" (cell i j))))
   (newline))
  
