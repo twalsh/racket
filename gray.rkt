@@ -12,14 +12,13 @@
           (define next-level (flatten (list (make-list nlw #\0) (make-list nlw #\1))))
           (cons next-level mirror))))
   (define layers (make-layer n))
-  (reverse 
-   (let loop ((layers layers) (codes '()))
+   (let loop ((layers layers))
      (if (empty? (first layers))
-         codes
+         '()
          (let ((next-code
                 (list->string (map car layers))))
-           (loop (map rest layers) (cons next-code codes))
-           )))))
+           (cons next-code (loop (map rest layers)))
+           ))))
         
 (gray-code 1)
 (gray-code 2)
