@@ -1,6 +1,10 @@
 #lang racket
 
-(define first-generation (vector 4 0 0 0 0 3 0 0 0 -2))
+(define first-generation (make-vector 512 0))
+(vector-set*! first-generation
+              0 4
+              9 -2)
+
 (define size (vector-length first-generation))
 
 (let loop ((g 0) (this-generation first-generation))
@@ -15,8 +19,11 @@
               (unless (> (vector-ref next-generation k) 0)
                 (vector-set! next-generation k n))
               (let ((next-gene (vector-ref this-generation k)))
-                (printf "i ~a j ~a k ~a n ~a ng ~a~n" i j k n next-gene)
+        ;        (printf "i ~a j ~a k ~a n ~a ng ~a~n" i j k n next-gene)
                 (unless (= next-gene j)
                   (reproduce (vector-ref this-generation k))))))))
-      (displayln this-generation)
+      (displayln (vector-take this-generation 10))
       (loop (add1 g) next-generation))))
+
+
+
