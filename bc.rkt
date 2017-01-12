@@ -1,17 +1,18 @@
 #lang racket
 
-(require (for-syntax racket/list))
-(require (for-syntax racket/string))
+(define ns (make-base-namespace))
 
-(define-syntax (bc stx)
-  (define input (second (syntax->datum stx)))
+
+(define (bc input)
+ 
   (define input-tokens (string-split input))
   (define op (string->symbol (first input-tokens)))
-  (displayln op)
   (define args (map string->number (rest input-tokens)))
-  (displayln args)
- 
-  (datum->syntax stx `(exact->inexact (,op ,@args))))
+  (define expression `(exact->inexact (,op ,@args)))
+  (eval expression ns))
 
-(bc "/ 193 693")
-
+(for ((input '("+ 1 2"
+               "- 2 3"
+               "* 3 4"
+               "/ 4 5")))
+  (printf "~a ~a~n" input (bc input)))
